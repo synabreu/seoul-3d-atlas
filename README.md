@@ -1,3 +1,85 @@
+# Seoul Apartment Prices — 3D Atlas v2.0
+
+`apt-price` forks the v1.7 atlas into a separate OpenAI Sites project. The original atlas remains available at its existing URL.
+
+The new apartment tab searches Seoul's public sale records by name, address and district. A selected item shows contract date, exact reported amount in KRW, area, floor and transaction type. Area, floor and contract-year filters are supported. Cancellation and presale/occupancy-rights transfers are opt-in; they never determine the map's latest apartment sale amount. A floor is not a unit identifier.
+
+This is a dated public-data snapshot, not a complete inventory of homes or an all-time/live transaction feed. Building-dong and unit numbers are unavailable in this source. No identities or unit numbers are inferred. Official catalog coordinates represent apartment complexes, not the building or unit involved in a transaction. Unlocated sales remain searchable. Unique name/address matches are deliberately conservative; unmatched management-catalog entries may describe complexes present under other transaction names.
+
+Sources downloaded 2026-09-08:
+
+- [Seoul apartment sale records](https://data.seoul.go.kr/dataList/OA-21275/S/1/datasetView.do): 189,991 source rows; one inconsistent non-Seoul district code excluded. 189,990 rows retained, including 10,482 cancellations and 3,062 rights transfers. Default active apartment sales: 176,808. Receipt years 2024–2026, contract dates 2023-01-29–2026-09-05.
+- [Seoul apartment catalog](https://data.seoul.go.kr/dataList/OA-15818/S/1/datasetView.do): 2,887 source catalog records. Matched or standalone official coordinates are available for 2,847 catalog/transaction entries; 1,713 of these have linked transaction data. Names/addresses can differ between sources, so the combined result count is not a count of distinct physical complexes.
+- Both sources are Seoul Metropolitan Government data under KOGL Type 1. Source hashes and coverage are recorded in `dist/data/apartments/provenance.json`.
+
+The initial index is about 3 MB. Transaction files load by district only when needed. The map uses instanced location points and at most 36 visible price labels; it does not instantiate apartment units or attach prices to anonymous building meshes.
+
+Rebuild the snapshot with Python's standard library:
+
+```sh
+python build_apt_data.py --download-dir /absolute/temporary/cache
+node recording/verify_apartments.mjs
+```
+
+The data download uses the Seoul portal's public CSV download form. It does not scrape the MOLIT transaction viewer. No API credentials or server are required. Validate a regenerated snapshot before publishing; source schemas and available years can change. The check records the current expected source count so a changed upstream release requires review.
+
+The verifier checks all 25 district partitions, source totals, prices, cancellation/right-type handling, latest-sale selection, search filters and control references without a browser. No browser or mobile FPS measurements are claimed.
+
+---
+
+# 서울 3D 지도 (Seoul 3D Atlas) · v1.7
+
+v1.7 adds bilingual Korean (English) controls and terrain-following hiking paths
+for Seoul and surrounding mountains. The existing 267,080 source building
+records, 21 landmarks, five environment modes, four tree seasons and blue
+lower Han River are retained. The outer extension contains terrain and trails.
+
+The trail snapshot is 2026-09-08 05:36:51 UTC. It covers 126.70–127.35° E and
+37.25–37.85° N: 804 OSM peaks, 13,719 mapped mountain walking/hiking sections
+and 1,595 computed summit connections. This is the available mapped inventory
+within that rectangle, not a guarantee of every real-world mountain or trail.
+All sections can be selected from a nearby peak. Peaks without mapped paths
+show an explicit empty state. Mountain groupings overlap geographically.
+
+Open **등산로 (Trails)**, choose a mountain and a summit connection or original
+section. Green marks the start, orange-red the finish; the selected line is
+outlined in pale cream. The endpoint buttons focus each exact coordinate.
+**코스 전체 보기 (View full route)** fits the route. Independent switches show
+paths and both endpoint types. City navigation remains under **도시 (City)**.
+
+Connections follow actual connected OSM pedestrian edges and respect explicit
+pedestrian direction tags. They are exploratory connections rather than
+designated courses. A summit offset is shown when the path stops near the peak.
+The source section's first/last coordinates do not mandate a hiking direction.
+Distances are horizontal mapped lengths. Closures are not live.
+
+To reproduce the new data, obtain an Overpass JSON snapshot with:
+
+```overpass
+[out:json][timeout:140];
+(way["highway"~"^(path|footway|steps|track)$"](37.25,126.70,37.85,127.35);
+ node["natural"="peak"](37.25,126.70,37.85,127.35);
+ node["highway"="trailhead"](37.25,126.70,37.85,127.35);
+ node["information"="guidepost"](37.25,126.70,37.85,127.35);
+ relation["route"="hiking"](37.25,126.70,37.85,127.35););
+out body geom;
+```
+
+Use Python with numpy, scipy, Pillow and shapely for data processing:
+
+```bash
+python extend_terrain.py --cache /absolute/path/cache
+python build_trails.py --input /absolute/path/osm-trails.json
+python extend_water.py --cache /absolute/path/cache
+```
+
+The terrain extender preserves the original core grid exactly. The water
+extender clips only the outer region, keeps the original water geometry and
+extends the blue material to connected downstream water. Source provenance and
+coverage are also available in the About dialog and `/data/trails.json`.
+
+---
+
 # Seoul 3D Atlas v1.6
 
 A self-contained Three.js city diorama covering all 25 districts of Seoul, plus a small surrounding context margin. Static Site; no API keys or runtime map service is required.

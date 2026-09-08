@@ -47,7 +47,7 @@ assert.equal(foliage.deciduousTrees.visible,true,'Foliage returns after winter')
 assert.ok(new THREE.Box3().setFromObject(built.base).max.y<0,'Foundation must stay below zero elevation');
 const river=lower[0],ray=new THREE.Raycaster();
 const downstream=[[-20.5,-9],[-19.5,-8],[-18.5,-7.5],[-16.5,-6.3],[-14,-4]];
-const west=data.terrain.bounds[0][0];
+const west=data.meta.trailTerrainExpansion?.originalBounds[0][0]??data.terrain.bounds[0][0];
 const boundaryRing=data.water[data.meta.lowerHangangWater.waterFeatureIndices[0]][0];
 const edge=boundaryRing.filter(p=>p[0]===west);
 assert.ok(edge.length>=2,'River geometry must reach the western map boundary');

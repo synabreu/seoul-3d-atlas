@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node --check dist/app.js"
+    "build": "node --check dist/app.js && node --check dist/hiking.js && node --check dist/apt-model.js && node --check dist/apt-prices.js"
   },
   "devDependencies": {
     "vite": "^7.0.0"
