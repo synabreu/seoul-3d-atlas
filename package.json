@@ -1,0 +1,12 @@
+{
+  "name": "seoul-3d-atlas-preview",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "node --check dist/app.js"
+  },
+  "devDependencies": {
+    "vite": "^7.0.0"
+  }
+}
