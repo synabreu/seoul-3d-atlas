@@ -1,11 +1,13 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createHikingExplorer } from './hiking.js?v=2.0-apt-1';
-import { createApartmentExplorer } from './apt-prices.js?v=2.0-apt-1';
+import { createHikingExplorer } from './hiking.js?v=2.5-i18n-1';
+import { createApartmentExplorer } from './apt-prices.js?v=2.5-i18n-1';
+import { initI18n, t, pick, getLanguage } from './i18n.js?v=2.5-i18n-1';
 
-const ATLAS_VERSION = '2.0';
-const ASSET_REVISION = '2.0-apt-1';
+const ATLAS_VERSION = '2.5';
+const ASSET_REVISION = '2.5-i18n-1';
 const $ = id => document.getElementById(id);
+initI18n();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const mobile = () => innerWidth <= 650;
 const nextPaint = () => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
@@ -50,6 +52,30 @@ const places = [
  {name:'마곡 · 서울식물원',en:'Magok · Seoul Botanic Park',ll:[126.835,37.5697],kind:'botanic',zoom:6,top:.26,description:'서울 서쪽, 도시와 정원이 만나는 곳'},
  {name:'관악산',en:'Gwanaksan',ll:[126.964,37.4442],kind:'mountain',zoom:3.7,top:.22,description:'서울 남쪽 경계에 펼쳐진 바위 능선'}
 ];
+const placeDescriptionsEn = [
+ 'Gangnam Station intersection, where Gangnam-daero meets Teheran-ro',
+ 'The COEX convention center and World Trade Center in Samseong-dong',
+ 'Seoul Station, its forecourt, and the rail gateway to the city center',
+ 'Gwanghwamun Square, Sejong-daero, and the approach to Gyeongbokgung',
+ 'The city around Yongsan Station between the railway and the Han River',
+ 'Gimpo International Airport and its domestic and international terminals in western Seoul',
+ 'Jamsil Station, Seokchon Lake, and the Lotte World district',
+ 'Central Gangdong, including Cheonho, Gil-dong, Myeongil, and Godeok',
+ 'A Joseon palace and one of Seoul’s historic centers',
+ 'The observatory rising from Namsan in the heart of the city',
+ 'Seoul’s skyline rising above the lakes of Jamsil',
+ 'An island of parks and towers between the Han River and Saetgang',
+ 'Silver curves beside the old city walls',
+ 'Where Seoul Forest, the Han River, and Seongsu meet',
+ 'From Hongdae streets to the Gyeongui Line Forest Park',
+ 'Mountains and ridges embracing northern Seoul',
+ 'A broad park containing Mongchontoseong and lakes',
+ 'Han River scenery beneath Banpo Bridge',
+ 'World Cup Stadium and riverside parks',
+ 'Where city and gardens meet in western Seoul',
+ 'Rocky ridges along Seoul’s southern edge'
+];
+places.forEach((place,index)=>{place.descriptionEn=placeDescriptionsEn[index];});
 const materials = {};
 function material(name, hex, extra={}) { const m=new THREE.MeshStandardMaterial({color:hex,roughness:.83,metalness:0,...extra});materials[name]=m;return m; }
 function toWorld(lon,lat){return[(lon-data.meta.origin[0])*data.meta.sx,(data.meta.origin[1]-lat)*data.meta.sz];}
@@ -65,7 +91,7 @@ function trailHeightAt(x,z){
 }
 function inBounds(x,z,pad=0){return x>=worldBounds[0][0]+pad&&x<=worldBounds[1][0]-pad&&z>=worldBounds[0][1]+pad&&z<=worldBounds[1][1]-pad;}
 function showToast(text){clearTimeout(toastTimer);$('toast').textContent=text;$('toast').hidden=false;toastTimer=setTimeout(()=>$('toast').hidden=true,3600);}
-function fail(error){console.error(error);$('loading').hidden=false;$('loading').classList.remove('done');$('loading-text').textContent='지도를 불러오지 못했습니다. 연결을 확인하거나 최신 Safari·Chrome에서 다시 열어 주세요.';$('retry').hidden=false;}
+function fail(error){console.error(error);$('loading').hidden=false;$('loading').classList.remove('done');$('loading-text').textContent=t('지도를 불러오지 못했습니다. 연결을 확인하거나 최신 Safari·Chrome에서 다시 열어 주세요.','Could not load the map. Check your connection or reopen it in the latest Safari or Chrome.');$('retry').hidden=false;}
 $('retry').onclick=()=>location.reload();
 
 function buildTerrain(){
@@ -405,42 +431,67 @@ function resize(){
 function tweenTo(target,zoom,offset=V(34,39,46),duration=2200){
  animation={start:performance.now(),duration:reducedMotion?0:duration,fromTarget:controls.target.clone(),toTarget:target,fromPosition:camera.position.clone(),toPosition:target.clone().add(offset),fromZoom:camera.zoom,toZoom:zoom};
 }
+let locationState={nameKo:'서울, 한눈에',nameEn:'Seoul overview',descKo:'한강과 산, 그 사이에 펼쳐진 25개 자치구',descEn:'Twenty-five districts between the Han River and the mountains',ll:[126.978,37.5665],index:'SEOUL'};
+function renderLocation(){
+ const state=locationState;if(!state)return;
+ $('location-name').textContent=pick(state.nameKo,state.nameEn);
+ $('location-en').textContent=t('서울 3D 지도','Seoul 3D Atlas');
+ $('location-description').textContent=pick(state.descKo,state.descEn);
+ $('location-index').textContent=state.index;
+ $('location-coordinates').textContent=`${state.ll[1].toFixed(4)}° N   ${state.ll[0].toFixed(4)}° E`;
+}
 function resetView(){
  stopTour();hikingExplorer?.setTab('places');selected=-1;flatView=false;updateViewButton();updateSelection();
  tweenTo(mobile()?V(0,.1,0):V(-4.5,.1,3.1),1,V(34,39,46));
- setLocation('서울, 한눈에 (Seoul overview)','미니어처 도시 (City in miniature)','한강과 산, 그 사이에 펼쳐진 25개 자치구',[126.978,37.5665],'SEOUL');$('district').value='';
+ setLocation('서울, 한눈에','Seoul overview','한강과 산, 그 사이에 펼쳐진 25개 자치구',[126.978,37.5665],'SEOUL','Twenty-five districts between the Han River and the mountains');$('district').value='';
 }
-function setLocation(name,en,desc,ll,index='SEOUL'){$('location-name').textContent=name;$('location-en').textContent=en;$('location-description').textContent=desc;$('location-index').textContent=index;$('location-coordinates').textContent=`${ll[1].toFixed(4)}° N   ${ll[0].toFixed(4)}° E`;}
+function setLocation(nameKo,nameEn,descKo,ll,index='SEOUL',descEn=descKo){locationState={nameKo,nameEn,descKo,descEn,ll,index};renderLocation();}
 function updateSelection(){
  for(let i=0;i<places.length;i++){places[i].button.classList.toggle('selected',i===selected);places[i].button.setAttribute('aria-current',i===selected?'location':'false');places[i].label.classList.toggle('selected',i===selected);places[i].pinElement?.classList.toggle('selected',i===selected);}
 }
 function focusPlace(i,touring=false){
  if(!touring)stopTour();hikingExplorer?.setTab('places');selected=i;flatView=false;updateViewButton();const p=places[i];
  tweenTo(V(p.x,heightAt(p.x,p.z)+p.top*.32,p.z),clamp(p.zoom*(mobile()?targetHalfHeight/24:1),1,28),V(...(p.offset||[14,16,20])),touring?3200:2200);
- setLocation(p.name,p.en,p.description,p.ll,String(i+1).padStart(2,'0'));updateSelection();closeExplore();$('district').value='';
+ setLocation(p.name,p.en,p.description,p.ll,String(i+1).padStart(2,'0'),p.descriptionEn);updateSelection();closeExplore();$('district').value='';
 }
-function stopTour(){runningTour=false;$('tour').setAttribute('aria-pressed','false');$('tour-text').innerHTML='자동 비행<small>(Auto tour)</small>';$('play-icon').innerHTML='<path d="m9 5 11 7-11 7Z"/>';$('tour-progress').style.width='0';}
-function startTour(){runningTour=true;tourIndex=0;shotStart=performance.now();focusPlace(tourIndex,true);$('tour').setAttribute('aria-pressed','true');$('tour-text').innerHTML='비행 멈춤<small>(Stop tour)</small>';$('play-icon').innerHTML='<path d="M8 5h2v14H8zM16 5h2v14h-2z"/>';closeExplore();}
-function updateViewButton(){$('view-text').innerHTML=flatView?'입체 보기<small>(3D view)</small>':'평면 보기<small>(2D view)</small>';$('view-mode').setAttribute('aria-pressed',flatView);}
+function stopTour(){runningTour=false;$('tour').setAttribute('aria-pressed','false');$('tour-text').textContent=t('자동 비행','Auto tour');$('play-icon').innerHTML='<path d="m9 5 11 7-11 7Z"/>';$('tour-progress').style.width='0';}
+function startTour(){runningTour=true;tourIndex=0;shotStart=performance.now();focusPlace(tourIndex,true);$('tour').setAttribute('aria-pressed','true');$('tour-text').textContent=t('비행 멈춤','Stop tour');$('play-icon').innerHTML='<path d="M8 5h2v14H8zM16 5h2v14h-2z"/>';closeExplore();}
+function updateViewButton(){$('view-text').textContent=flatView?t('입체 보기','3D view'):t('평면 보기','2D view');$('view-mode').setAttribute('aria-pressed',flatView);}
 function closeExplore(){$('explore').classList.remove('open');$('open-explore').setAttribute('aria-expanded','false');}
+function refreshMapLanguage(){
+ $('place-count').textContent=t(`${places.length}곳`,`${places.length} places`);
+ for(const p of places){
+  p.button?.querySelector('.place-title')?.replaceChildren(document.createTextNode(pick(p.name,p.en)));
+  const secondary=p.button?.querySelector('.place-en');if(secondary){secondary.textContent='';secondary.hidden=true;}
+  if(p.label){p.label.textContent=pick(p.name,p.en);p.label.setAttribute('aria-label',t(`${p.name} 위치로 이동`,`Go to ${p.en}`));}
+  if(p.pinElement){p.pinElement.title=pick(p.name,p.en);p.pinElement.setAttribute('aria-label',t(`${p.name} 위치로 이동`,`Go to ${p.en}`));}
+ }
+ if(data?.meta?.hangangWater?.element)data.meta.hangangWater.element.textContent=t(data.meta.hangangWater.label,'Han River');
+ if(data){
+  for(const option of $('district').options){if(!option.value)continue;const district=data.districts.find(d=>d.name===option.value);if(district)option.textContent=pick(district.name,district.en);}
+ }
+ $('boundaries').textContent=borderLines?.visible?t('숨김','Hide'):t('표시','Show');
+ if(runningTour)$('tour-text').textContent=t('비행 멈춤','Stop tour');else $('tour-text').textContent=t('자동 비행','Auto tour');
+ updateViewButton();renderLocation();
+}
 function buildUI(){
- $('place-count').textContent=places.length+'곳 (places)';
+ $('place-count').textContent=t(`${places.length}곳`,`${places.length} places`);
  places.forEach((p,i)=>{
-  const b=document.createElement('button');b.className='place';b.innerHTML=`<span class="place-number">${String(i+1).padStart(2,'0')}</span><span><span class="place-title">${p.name}</span><span class="place-en">(${p.en})</span></span><span class="place-icon" aria-hidden="true">↗</span>`;b.onclick=()=>focusPlace(i);$('places').append(b);p.button=b;
-  const l=document.createElement('button');l.className='map-label';l.textContent=`${p.name} (${p.en})`;l.setAttribute('aria-label',`${p.name} (${p.en}) 위치로 이동 (Go to location)`);l.onclick=()=>focusPlace(i);$('labels').append(l);p.label=l;labels.push({p,el:l,pos:V(p.x,heightAt(p.x,p.z)+p.top+.14,p.z)});
-  if(p.pin){const pin=document.createElement('button');pin.className='map-pin';pin.hidden=true;pin.title=`${p.name} (${p.en})`;pin.setAttribute('aria-label',`${p.name} (${p.en}) 위치로 이동 (Go to location)`);pin.onclick=()=>focusPlace(i);$('labels').append(pin);p.pinElement=pin;p.pinPosition=V(p.x,heightAt(p.x,p.z)+.04,p.z);}
+  const b=document.createElement('button');b.className='place';b.innerHTML=`<span class="place-number">${String(i+1).padStart(2,'0')}</span><span><span class="place-title">${pick(p.name,p.en)}</span><span class="place-en" hidden></span></span><span class="place-icon" aria-hidden="true">↗</span>`;b.onclick=()=>focusPlace(i);$('places').append(b);p.button=b;
+  const l=document.createElement('button');l.className='map-label';l.textContent=pick(p.name,p.en);l.setAttribute('aria-label',t(`${p.name} 위치로 이동`,`Go to ${p.en}`));l.onclick=()=>focusPlace(i);$('labels').append(l);p.label=l;labels.push({p,el:l,pos:V(p.x,heightAt(p.x,p.z)+p.top+.14,p.z)});
+  if(p.pin){const pin=document.createElement('button');pin.className='map-pin';pin.hidden=true;pin.title=pick(p.name,p.en);pin.setAttribute('aria-label',t(`${p.name} 위치로 이동`,`Go to ${p.en}`));pin.onclick=()=>focusPlace(i);$('labels').append(pin);p.pinElement=pin;p.pinPosition=V(p.x,heightAt(p.x,p.z)+.04,p.z);}
  });
  const river=data.meta.hangangWater;
  if(river){
   const [x,z]=toWorld(...river.labelCoordinates),y=waterAt(x,z);
-  if(y!==null){const el=document.createElement('span');el.className='map-label water-label';el.textContent=river.label+' (Hangang River)';el.hidden=true;$('labels').append(el);labels.push({p:{major:true},el,pos:V(x,y+.07,z)});}
+  if(y!==null){const el=document.createElement('span');el.className='map-label water-label';el.textContent=t(river.label,'Han River');el.hidden=true;$('labels').append(el);labels.push({p:{major:true},el,pos:V(x,y+.07,z)});river.element=el;}
  }
- for(const d of [...data.districts].sort((a,b)=>a.name.localeCompare(b.name,'ko'))){const o=document.createElement('option');o.value=d.name;o.textContent=`${d.name} (${d.en})`;$('district').append(o);}
+ for(const d of [...data.districts].sort((a,b)=>a.name.localeCompare(b.name,'ko'))){const o=document.createElement('option');o.value=d.name;o.textContent=pick(d.name,d.en);$('district').append(o);}
  $('district').onchange=e=>{
   const d=data.districts.find(d=>d.name===e.target.value);if(!d)return;stopTour();hikingExplorer?.setTab('places');selected=-1;updateSelection();flatView=false;updateViewButton();
   const points=d.rings.flat(),xs=points.map(p=>p[0]),zs=points.map(p=>p[1]),minX=Math.min(...xs),maxX=Math.max(...xs),minZ=Math.min(...zs),maxZ=Math.max(...zs),x=(minX+maxX)/2,z=(minZ+maxZ)/2;
   const zoom=clamp(25/Math.max(maxX-minX,maxZ-minZ),2,6)*(mobile()?targetHalfHeight/24:1);tweenTo(V(x,heightAt(x,z),z),clamp(zoom,1,28),V(22,25,29));
-  setLocation(d.name,d.en,'자치구 안의 도로와 동네를 자유롭게 둘러보세요.',[x/data.meta.sx+data.meta.origin[0],data.meta.origin[1]-z/data.meta.sz]);closeExplore();
+  setLocation(d.name,d.en,'자치구 안의 도로와 동네를 자유롭게 둘러보세요.',[x/data.meta.sx+data.meta.origin[0],data.meta.origin[1]-z/data.meta.sz],d.code,'Explore the roads and neighborhoods within this district.');closeExplore();
  };
  for(const b of document.querySelectorAll('[data-time-choice]'))b.onclick=()=>setTime(b.dataset.timeChoice);
  $('season').onchange=e=>setSeason(e.target.value);
@@ -449,16 +500,18 @@ function buildUI(){
  $('north').onclick=()=>{stopTour();tweenTo(controls.target.clone(),camera.zoom,V(0,flatView?65:42,flatView?.001:45),1300);};
  $('view-mode').onclick=()=>{stopTour();flatView=!flatView;updateViewButton();tweenTo(controls.target.clone(),camera.zoom,flatView?V(0,65,.001):V(34,39,46),1500);};
  $('toggle-labels').onclick=()=>{labelsVisible=!labelsVisible;$('toggle-labels').classList.toggle('active',labelsVisible);$('toggle-labels').setAttribute('aria-pressed',labelsVisible);};
- $('boundaries').onclick=()=>{borderLines.visible=!borderLines.visible;$('boundaries').setAttribute('aria-pressed',borderLines.visible);$('boundaries').textContent=borderLines.visible?'숨김 (Hide)':'표시 (Show)';};
+ $('boundaries').onclick=()=>{borderLines.visible=!borderLines.visible;$('boundaries').setAttribute('aria-pressed',borderLines.visible);$('boundaries').textContent=borderLines.visible?t('숨김','Hide'):t('표시','Show');};
  $('open-explore').onclick=()=>{const open=$('explore').classList.toggle('open');$('open-explore').setAttribute('aria-expanded',open);};$('close-explore').onclick=closeExplore;
  const showAbout=()=>{stopTour();$('about').showModal();};$('info').onclick=showAbout;$('credits').onclick=showAbout;$('close-about').onclick=()=>$('about').close();
  $('about').addEventListener('click',e=>{if(e.target===$('about')){const r=$('about').getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)$('about').close();}});
- $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else showToast('이 브라우저에서는 기기를 가로로 돌려 넓게 볼 수 있습니다.');}catch{showToast('전체 화면을 열 수 없습니다. 기기를 가로로 돌려 보세요.');}};
+ $('fullscreen').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else if(document.documentElement.requestFullscreen)await document.documentElement.requestFullscreen();else showToast(t('이 브라우저에서는 기기를 가로로 돌려 넓게 볼 수 있습니다.','Rotate your device to landscape for a wider view.'));}catch{showToast(t('전체 화면을 열 수 없습니다. 기기를 가로로 돌려 보세요.','Fullscreen is unavailable. Try rotating your device to landscape.'));}};
  $('viewport').addEventListener('keydown',e=>{
   if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){e.preventDefault();stopTour();animation=null;const delta=1.2/camera.zoom;const x=e.key==='ArrowLeft'?-delta:e.key==='ArrowRight'?delta:0,z=e.key==='ArrowUp'?-delta:e.key==='ArrowDown'?delta:0;controls.target.add(V(x,0,z));camera.position.add(V(x,0,z));}
   if(e.key==='+'||e.key==='=')$('zoom-in').click();if(e.key==='-')$('zoom-out').click();if(e.key.toLowerCase()==='h')resetView();
  });
+ refreshMapLanguage();
 }
+document.addEventListener('atlas-language-change',refreshMapLanguage);
 const projected=new THREE.Vector3();
 function blockedByEnvironment(x,y){const r=environmentBounds;return r&&x+64>r.left&&x-64<r.right&&y>r.top-8&&y-36<r.bottom+8;}
 function updateLabels(){
@@ -485,7 +538,7 @@ function animate(now){
  const dt=Math.min((now-lastTime)/1000,.05);lastTime=now;
  if(animation){const a=animation;const t=a.duration?clamp((now-a.start)/a.duration,0,1):1;const ease=t*t*(3-2*t);controls.target.lerpVectors(a.fromTarget,a.toTarget,ease);camera.position.lerpVectors(a.fromPosition,a.toPosition,ease);camera.zoom=THREE.MathUtils.lerp(a.fromZoom,a.toZoom,ease);camera.updateProjectionMatrix();if(t===1)animation=null;}
  else if(runningTour&&!reducedMotion){const delta=camera.position.clone().sub(controls.target);delta.applyAxisAngle(V(0,1,0),dt*.045);camera.position.copy(controls.target).add(delta);}
- if(runningTour){const elapsed=now-shotStart;$('tour-progress').style.width=Math.min(100,elapsed/105)+'%';if(elapsed>10500){tourIndex++;if(tourIndex>=places.length){stopTour();resetView();showToast('서울 한 바퀴를 마쳤습니다. 원하는 곳을 더 둘러보세요.');}else{shotStart=now;focusPlace(tourIndex,true);}}}
+ if(runningTour){const elapsed=now-shotStart;$('tour-progress').style.width=Math.min(100,elapsed/105)+'%';if(elapsed>10500){tourIndex++;if(tourIndex>=places.length){stopTour();resetView();showToast(t('서울 한 바퀴를 마쳤습니다. 원하는 곳을 더 둘러보세요.','The Seoul tour is complete. Keep exploring anywhere you like.'));}else{shotStart=now;focusPlace(tourIndex,true);}}}
  controls.update();
  if(!animation){const x=clamp(controls.target.x,worldBounds[0][0],worldBounds[1][0]),z=clamp(controls.target.z,worldBounds[0][1],worldBounds[1][1]);camera.position.x+=x-controls.target.x;camera.position.z+=z-controls.target.z;controls.target.x=x;controls.target.z=z;}
  if(!reducedMotion){
@@ -512,10 +565,10 @@ async function init(){
  controls.addEventListener('start',()=>{animation=null;stopTour();});
  hemisphere=new THREE.HemisphereLight('#d8e7f2','#b5c4a3',2.1);scene.add(hemisphere);sun=new THREE.DirectionalLight('#fff2d6',3.1);sun.position.set(-25,42,12);sun.castShadow=true;sun.shadow.mapSize.set(mobile()?1024:2048,mobile()?1024:2048);Object.assign(sun.shadow.camera,{left:-25,right:25,top:25,bottom:-25,near:1,far:120});sun.shadow.bias=-.0004;sun.shadow.normalBias=.025;scene.add(sun);
  floor=new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),new THREE.MeshStandardMaterial({color:'#e6ede7',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.94;floor.receiveShadow=true;scene.add(floor);
- buildTerrain();await nextPaint();$('loading-text').textContent='한강과 서울의 거리를 잇는 중';buildSurface();$('loading-bar').style.width='62%';await nextPaint();
- buildBuildings();buildTrees();$('loading-text').textContent='서울의 랜드마크를 세우는 중';$('loading-bar').style.width='83%';await nextPaint();
+ buildTerrain();await nextPaint();$('loading-text').textContent=t('한강과 서울의 거리를 잇는 중','Connecting the Han River and Seoul’s streets');buildSurface();$('loading-bar').style.width='62%';await nextPaint();
+ buildBuildings();buildTrees();$('loading-text').textContent=t('서울의 랜드마크를 세우는 중','Placing Seoul’s landmarks');$('loading-bar').style.width='83%';await nextPaint();
  buildLandmarks();buildBorders();buildBoats();buildStars();buildUI();setTime('day');resize();
- $('loading-text').textContent='산과 등산로를 연결하는 중 (Mapping mountain trails)';await nextPaint();
+ $('loading-text').textContent=t('산과 등산로를 연결하는 중','Mapping mountain trails');await nextPaint();
  hikingExplorer=createHikingExplorer(trailData,{scene,camera,toWorld,groundHeight:(x,z)=>Math.max(trailHeightAt(x,z),waterAt(x,z)??-Infinity)+.005,$,stopTour,closeExplore,setLocation,
   clearPlaceSelection:()=>{selected=-1;updateSelection();flatView=false;updateViewButton();$('district').value='';},
   flyTo:(x,z,y,radius)=>{const aspect=innerWidth/innerHeight,availableWidth=mobile()?innerWidth-45:Math.max(210,innerWidth-650),availableHeight=Math.max(180,innerHeight-(mobile()?360:200));const span=Math.max(.8,radius*2.5),zoom=clamp(Math.min(targetHalfHeight*2*aspect*(availableWidth/innerWidth)/span,targetHalfHeight*2*(availableHeight/innerHeight)/span),.65,22);tweenTo(V(x,y,z),zoom,V(16,24,20));}
@@ -527,6 +580,6 @@ async function init(){
   flyDistrict:(code,districts)=>{const name=districts.find(d=>d.code===code)?.name,d=data.districts.find(d=>d.name===name);if(!d)return;stopTour();const pts=d.rings.flat(),xs=pts.map(p=>p[0]),zs=pts.map(p=>p[1]),x=(Math.min(...xs)+Math.max(...xs))/2,z=(Math.min(...zs)+Math.max(...zs))/2;tweenTo(V(x,heightAt(x,z),z),3.5,V(16,24,20));}
  });apartmentExplorer.load();hikingExplorer.setTab('apts');controls.update();sceneReady=true;renderer.render(scene,camera);$('loading-bar').style.width='100%';$('loading').classList.add('done');setTimeout(()=>$('loading').hidden=true,750);window.addEventListener('resize',resize);requestAnimationFrame(animate);
  // Read-only state for non-browser functional checks and diagnostics.
- window.seoulAtlas={getState:()=>({version:ATLAS_VERSION,ready:sceneReady,buildings:buildings.count,districts:data.districts.length,landmarks:places.length,time:mode,season,touring:runningTour,hiking:hikingExplorer?.getState(),apartments:apartmentExplorer?.getState()}),focusPlace,resetView,setTime,setSeason,selectApartment:id=>apartmentExplorer.selectComplex(id,true),selectMountain:(id)=>hikingExplorer.selectMountain(id,true),selectTrail:(id)=>hikingExplorer.selectRoute(id,true)};
+ window.seoulAtlas={getState:()=>({version:ATLAS_VERSION,language:getLanguage(),ready:sceneReady,buildings:buildings.count,districts:data.districts.length,landmarks:places.length,time:mode,season,touring:runningTour,hiking:hikingExplorer?.getState(),apartments:apartmentExplorer?.getState()}),focusPlace,resetView,setTime,setSeason,selectApartment:id=>apartmentExplorer.selectComplex(id,true),selectMountain:(id)=>hikingExplorer.selectMountain(id,true),selectTrail:(id)=>hikingExplorer.selectRoute(id,true)};
 }
 init().catch(fail);

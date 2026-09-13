@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "node --check dist/app.js && node --check dist/hiking.js && node --check dist/apt-model.js && node --check dist/apt-prices.js"
+    "build": "node --check dist/i18n.js && node --check dist/app.js && node --check dist/hiking.js && node --check dist/apt-model.js && node --check dist/apt-prices.js && node recording/verify_i18n.mjs"
   },
   "devDependencies": {
     "vite": "^7.0.0"

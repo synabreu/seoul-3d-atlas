@@ -60,3 +60,12 @@ body[data-time="snow"] .vignette{background:linear-gradient(180deg,#eff7ff50,tra
 @media(max-height:560px){.explore{top:88px;bottom:128px;max-height:calc(100dvh - 216px)}.brand .eyebrow,.brand p{display:none}.brand{top:6px}.top-actions{top:10px}.location-card{display:none}}
 
 .map-label{max-width:240px;white-space:normal;text-align:center;line-height:1.4}.map-label.water-label{max-width:250px;font-size:13px}.fit-trail{color:#fff}body[data-time="night"] .fit-trail{background:#317e78;color:#fff}
+
+
+/* v2.5: persistent Korean/English resource switch */
+.language-switch{position:fixed;left:38px;top:136px;z-index:8;display:inline-flex;gap:3px;padding:4px;border-radius:10px}
+.language-switch button{min-width:66px;padding:8px 11px;border-radius:7px;font-size:13px;font-weight:600;color:var(--muted)}
+.language-switch button.selected{background:var(--accent);color:#fff}
+.language-switch button:focus-visible{outline-offset:2px}
+@media(max-width:850px) and (min-width:651px){.language-switch{left:28px;top:119px}}
+@media(max-width:650px){.language-switch{left:auto;right:14px;top:max(16px,env(safe-area-inset-top));padding:3px}.language-switch button{min-width:58px;padding:7px 8px;font-size:12px}}
