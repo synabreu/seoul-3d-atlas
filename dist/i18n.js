@@ -156,6 +156,26 @@ export function applyStaticTranslations() {
     'Apartments: Links Seoul’s public sale records with apartment-complex coordinates. Search and filter sales by floor, area, and contract year. Building and unit numbers are unavailable; map points are representative complex locations. See Coverage and sources for dates and scope.'
   );
   text('#about .about-note', '차량과 배의 움직임은 연출입니다. 길 안내나 측량용 지도가 아닙니다.', 'Vehicle and boat motion is illustrative. This is not a navigation or surveying map.');
+  html('#about dl > div:nth-child(1) dd',
+    '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors · ODbL</a> · <a href="/data/trails.json" download>등산로 데이터</a><br><span id="trails-data-date"></span>',
+    '<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors · ODbL</a> · <a href="/data/trails.json" download>Trail data</a><br><span id="trails-data-date"></span>'
+  );
+  html('#about dl > div:nth-child(2) dd',
+    '<a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a> / <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> / <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors · ODbL</a><br>2026-08-30 데이터 스냅샷',
+    '<a href="https://openfreemap.org/" target="_blank" rel="noopener">OpenFreeMap</a> / <a href="https://openmaptiles.org/" target="_blank" rel="noopener">OpenMapTiles</a> / <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">© OpenStreetMap contributors · ODbL</a><br>Data snapshot: 2026-08-30'
+  );
+  html('#about dl > div:nth-child(3) dd',
+    '<a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles / Mapzen</a> · SRTM 등',
+    '<a href="https://registry.opendata.aws/terrain-tiles/" target="_blank" rel="noopener">AWS Terrain Tiles / Mapzen</a> · SRTM and others'
+  );
+  html('#about dl > div:nth-child(4) dd',
+    '<a href="https://github.com/southkorea/seoul-maps" target="_blank" rel="noopener">southkorea/seoul-maps</a> · 통계청 2013년 경계<br>현재 법정 경계와 차이가 있을 수 있습니다.',
+    '<a href="https://github.com/southkorea/seoul-maps" target="_blank" rel="noopener">southkorea/seoul-maps</a> · Statistics Korea 2013 boundaries<br>May differ from current legal boundaries.'
+  );
+  html('#about dl > div:nth-child(5) dd',
+    '<a href="https://threejs.org/" target="_blank" rel="noopener">Three.js</a> · <a href="/data/seoul.json" download>지형·도로 데이터</a> · <a href="/data/buildings.bin" download>건물 데이터</a> · <a href="/LICENSES.txt">라이선스</a>',
+    '<a href="https://threejs.org/" target="_blank" rel="noopener">Three.js</a> · <a href="/data/seoul.json" download>Terrain/roads</a> · <a href="/data/buildings.bin" download>Buildings</a> · <a href="/LICENSES.txt">Licenses</a>'
+  );
   const aboutLabels = [
     ['#about dl > div:nth-child(1) dt', '등산로', 'Trails'],
     ['#about dl > div:nth-child(2) dt', '지도·건물', 'Map'],
