@@ -22,10 +22,10 @@ const attr = (selector, name, ko, en) => {
 
 export function applyStaticTranslations() {
   document.documentElement.lang = current;
-  document.title = t('서울 아파트 실거래가 · 3D Atlas v2.5', 'Seoul Apartment Sales · 3D Atlas v2.5');
+  document.title = t('서울 아파트 실거래가 · 3D Atlas v2.7', 'Seoul Apartment Sales · 3D Atlas v2.7');
   const description = t(
-    '서울 아파트 실거래가 3D 지도 v2.5. 단지 검색, 면적·층·계약일별 매매 내역과 서울 25개 자치구.',
-    'Seoul apartment sales 3D map v2.5 with complex search, area, floor, contract-date filters, and all 25 districts.'
+    '서울 아파트 실거래가 3D 지도 v2.7. 단지 검색, 면적·층·계약일별 매매 내역과 서울 25개 자치구.',
+    'Seoul apartment sales 3D map v2.7 with complex search, area, floor, contract-date filters, and all 25 districts.'
   );
   document.querySelector('meta[name="description"]')?.setAttribute('content', description);
 
@@ -132,7 +132,7 @@ export function applyStaticTranslations() {
   text('#loading-text', '서울의 지형을 펼치는 중', 'Unfolding Seoul’s terrain');
   text('#retry', '다시 불러오기', 'Retry');
 
-  text('#about .dialog-top .eyebrow', '지도 안내 · v2.5', 'About this atlas · v2.5');
+  text('#about .dialog-top .eyebrow', '지도 안내 · v2.7', 'About this atlas · v2.7');
   attr('#close-about', 'aria-label', '설명 닫기', 'Close about');
   text('#about > h2', '서울을 닮은 작은 세계', 'A small world shaped like Seoul');
   text('#about > p:nth-of-type(1)',

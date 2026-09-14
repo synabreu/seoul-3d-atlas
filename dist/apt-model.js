@@ -1,4 +1,4 @@
-import { getLanguage, t, formatNumber } from './i18n.js?v=2.5-i18n-1';
+import { getLanguage, t, formatNumber } from './i18n.js?v=2.7-i18n-1';
 
 export const number = value => formatNumber(value);
 export function formatPrice(manwon) {

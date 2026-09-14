@@ -1,8 +1,8 @@
-# Seoul Apartment Prices — 3D Atlas v2.5
+# Seoul Apartment Prices — 3D Atlas v2.7
 
 `apt-price` forks the v1.7 atlas into a separate OpenAI Sites project. The original atlas remains available at its existing URL.
 
-v2.5 separates the entire interface into Korean and English resources. The 한국어 / English switch updates navigation, environment and season controls, map and landmark labels, hiking routes, apartment search and filters, sale details, price/date formatting, loading and error states, accessibility labels, and coverage/source dialogs without reloading. The preference is stored locally for the next visit. Official apartment names and addresses remain exactly as published by the source when no authoritative English field exists; UI labels and surrounding context are translated.
+v2.7 separates the entire interface into Korean and English resources. The 한국어 / English switch updates navigation, environment and season controls, map and landmark labels, hiking routes, apartment search and filters, sale details, price/date formatting, loading and error states, accessibility labels, and coverage/source dialogs without reloading. The preference is stored locally for the next visit. Official apartment names and addresses remain exactly as published by the source when no authoritative English field exists; UI labels and surrounding context are translated.
 
 The new apartment tab searches Seoul's public sale records by name, address and district. A selected item shows contract date, exact reported amount in KRW, area, floor and transaction type. Area, floor and contract-year filters are supported. Cancellation and presale/occupancy-rights transfers are opt-in; they never determine the map's latest apartment sale amount. A floor is not a unit identifier.
 

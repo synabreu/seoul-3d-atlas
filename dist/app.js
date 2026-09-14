@@ -1,11 +1,11 @@
 import * as THREE from 'three';
 import { OrbitControls } from './vendor/OrbitControls.js';
-import { createHikingExplorer } from './hiking.js?v=2.5-i18n-1';
-import { createApartmentExplorer } from './apt-prices.js?v=2.5-i18n-1';
-import { initI18n, t, pick, getLanguage } from './i18n.js?v=2.5-i18n-1';
+import { createHikingExplorer } from './hiking.js?v=2.7-i18n-1';
+import { createApartmentExplorer } from './apt-prices.js?v=2.7-i18n-1';
+import { initI18n, t, pick, getLanguage } from './i18n.js?v=2.7-i18n-1';
 
-const ATLAS_VERSION = '2.5';
-const ASSET_REVISION = '2.5-i18n-1';
+const ATLAS_VERSION = '2.7';
+const ASSET_REVISION = '2.7-i18n-1';
 const $ = id => document.getElementById(id);
 initI18n();
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;

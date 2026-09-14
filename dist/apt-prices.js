@@ -1,8 +1,8 @@
 import * as THREE from 'three';
-import {number, formatPrice, shortPrice, formatDate, filterComplexes, filterTrades, priceColor} from './apt-model.js?v=2.5-i18n-1';
-import { t, pick, getLanguage } from './i18n.js?v=2.5-i18n-1';
+import {number, formatPrice, shortPrice, formatDate, filterComplexes, filterTrades, priceColor} from './apt-model.js?v=2.7-i18n-1';
+import { t, pick, getLanguage } from './i18n.js?v=2.7-i18n-1';
 
-const REV = '2.5-i18n-1';
+const REV = '2.7-i18n-1';
 const LIST_SIZE = 24, TRADE_SIZE = 15, LABEL_COUNT = 36;
 const sourceURL = 'https://data.seoul.go.kr/dataList/OA-21275/S/1/datasetView.do';
 const catalogURL = 'https://data.seoul.go.kr/dataList/OA-15818/S/1/datasetView.do';
@@ -18,7 +18,7 @@ export function createApartmentExplorer(ctx) {
   selectedRing.rotation.x=-Math.PI/2;selectedRing.renderOrder=20;selectedRing.visible=false;root.add(selectedRing);
   const host=$('apt-explorer');
   host.innerHTML=`
-    <div class="apt-scope"><span>매매 실거래</span><b>v2.5</b></div>
+    <div class="apt-scope"><span>매매 실거래</span><b>v2.7</b></div>
     <p id="apt-coverage" class="apt-coverage" role="status">서울의 아파트 거래를 불러오는 중입니다. (Loading)</p>
     <div class="apt-search-controls">
       <label for="apt-query">아파트명·주소 (Name / address)</label>
@@ -54,7 +54,7 @@ export function createApartmentExplorer(ctx) {
   const setAria=(selector,ko,en)=>document.querySelector(selector)?.setAttribute('aria-label',t(ko,en));
   function applyApartmentChrome(){
     if(!dataset)setText('#apt-coverage','서울의 아파트 거래를 불러오는 중입니다.','Loading Seoul apartment sales.');
-    setText('#apt-explorer .apt-scope span','매매 실거래','Recorded sales');setText('#apt-explorer .apt-scope b','v2.5','v2.5');
+    setText('#apt-explorer .apt-scope span','매매 실거래','Recorded sales');setText('#apt-explorer .apt-scope b','v2.7','v2.7');
     labelText('label[for="apt-query"]','아파트명·주소','Name / address');$('apt-query').placeholder=t('예: 리센츠, 래미안, 반포동','e.g. complex name or address');
     labelText('label[for="apt-district"]','자치구','District');setText('#apt-district option[value=""]','서울 전체','All Seoul');
     labelText('label[for="apt-sort"]','정렬','Sort');setText('#apt-sort option[value="latest"]','최근 거래순','Latest sale');setText('#apt-sort option[value="price"]','최근 거래금액순','Sale price');setText('#apt-sort option[value="name"]','이름순','Name');
@@ -94,7 +94,10 @@ export function createApartmentExplorer(ctx) {
   };
   function renderCoverage(){
     if(!dataset)return;const m=dataset.meta;
-    renderCoverage();
+    $('apt-coverage').textContent=t(
+      `서울 ${dataset.districts.length}개 구 · 유효 거래 ${number(m.activeApartmentSales)}건 · 접수 ${m.receiptYears[0]}–${m.receiptYears.at(-1)} · 수집 ${m.retrievedAt.slice(0,10)}`,
+      `${dataset.districts.length} Seoul districts · ${number(m.activeApartmentSales)} active sales · Received ${m.receiptYears[0]}–${m.receiptYears.at(-1)} · Retrieved ${m.retrievedAt.slice(0,10)}`
+    );
   }
   function renderSourceFacts(){
     if(!dataset)return;const m=dataset.meta,facts=$('apt-source-facts');

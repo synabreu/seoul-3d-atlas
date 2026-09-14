@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { t, pick, formatNumber } from './i18n.js?v=2.5-i18n-1';
+import { t, pick, formatNumber } from './i18n.js?v=2.7-i18n-1';
 const coordinates=ll=>`${ll[1].toFixed(5)}° N, ${ll[0].toFixed(5)}° E`;
 const emptyGroup=g=>{while(g.children.length){const c=g.children[0];g.remove(c);c.geometry?.dispose();if(Array.isArray(c.material))c.material.forEach(m=>m.dispose());else c.material?.dispose();}};
 
